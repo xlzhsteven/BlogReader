@@ -6,10 +6,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.app.ListActivity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.Toast;
 
 public class MainListActivity extends ListActivity {
 
@@ -27,9 +31,12 @@ public class MainListActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main_list);
-
-		GetBlogPostTask getBlogPostTask = new GetBlogPostTask();
-		getBlogPostTask.execute();
+		if (isNetworkAvailable()) {
+			GetBlogPostTask getBlogPostTask = new GetBlogPostTask();
+			getBlogPostTask.execute();
+		}else {
+			Toast.makeText(this, "Network is unavailable!!", Toast.LENGTH_LONG).show();
+		}
 
 		// Toast.makeText(this, getString(R.string.no_items),
 		// Toast.LENGTH_LONG).show();
@@ -40,6 +47,16 @@ public class MainListActivity extends ListActivity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_list, menu);
 		return true;
+	}
+
+	public boolean isNetworkAvailable() {
+		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+		boolean isAvailable = false;
+		if (networkInfo != null && networkInfo.isConnected()) {
+			isAvailable = true;
+		}
+		return isAvailable;
 	}
 
 	private class GetBlogPostTask extends AsyncTask<Object, Void, String> {
