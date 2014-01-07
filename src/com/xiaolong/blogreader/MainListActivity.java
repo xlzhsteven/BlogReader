@@ -8,7 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ListActivity;
@@ -32,7 +32,8 @@ public class MainListActivity extends ListActivity {
 	// Create variable to use to get info from the website
 	public static final int NUMBER_OF_POSTS = 20;
 	public static final String TAG = MainListActivity.class.getSimpleName();
-
+	protected JSONObject mBlogData;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -65,11 +66,24 @@ public class MainListActivity extends ListActivity {
 		return isAvailable;
 	}
 
-	private class GetBlogPostTask extends AsyncTask<Object, Void, String> {
+	private void updatelist() {
+		if (mBlogData == null) {
+			
+		}
+		else {
+			try {
+				Log.d(TAG, mBlogData.toString(2));
+			} catch (JSONException e) {
+				Log.e(TAG, "Exception caught", e);			}
+		}
+	}
+	
+	private class GetBlogPostTask extends AsyncTask<Object, Void, JSONObject> {
 
 		@Override
-		protected String doInBackground(Object... params) {
+		protected JSONObject doInBackground(Object... params) {
 			int responseCode = -1;
+			JSONObject jsonResponse = null;
 			// TODO Auto-generated method stub
 			try {
 				URL blogFeedURL = new URL(
@@ -87,16 +101,8 @@ public class MainListActivity extends ListActivity {
 					reader.read(charArray);
 					String responseData = new String(charArray);
 					
-					// Handle JSON response
-					JSONObject jsonResponse = new JSONObject(responseData);
-					String status = jsonResponse.getString("status");
-					Log.v(TAG, status);
-					JSONArray jsonPosts = jsonResponse.getJSONArray("posts");
-					for (int i = 0; i < jsonPosts.length(); i++) {
-						JSONObject jsonPost = jsonPosts.getJSONObject(i);
-						String title = jsonPost.getString("title");
-						Log.v(TAG, "Post " + i + ": " + title);
-					}
+					jsonResponse = new JSONObject(responseData);
+					
 				}else {
 					Log.i(TAG, "Unsuccessful Http Code" + responseCode);
 				}
@@ -111,7 +117,14 @@ public class MainListActivity extends ListActivity {
 				// TODO: handle exception
 				Log.e(TAG, "Exception Caught", e);
 			}
-			return "Code" + responseCode;
+			return jsonResponse;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject result) {
+			// TODO Auto-generated method stub
+			mBlogData = result;
+			updatelist();
 		}
 
 	}
