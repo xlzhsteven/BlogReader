@@ -14,4 +14,6 @@
 	    <item>KitKat</item>
 	    
 	</string-array>
+	<string name="title">Opps! Sorry!</string>
+	<string name="error_message">There was an error getting data from blog</string>
 </resources>
